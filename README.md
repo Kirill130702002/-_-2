@@ -64,6 +64,7 @@ while i <= len(mon):
 2. Результаты выполнения в простанстве имен main.py и заполненная автоматическими этими же данными google таблица:
 ![image](https://user-images.githubusercontent.com/104893843/206854024-0d545429-7528-4524-af95-a0ef5e95e7b9.png)
 ![image](https://user-images.githubusercontent.com/104893843/206854035-720ce92c-ce19-4340-b209-3bd78f08a02b.png)
+![image](https://user-images.githubusercontent.com/104893843/206920345-150cae1c-ccb8-44c1-a0a8-97ecc985cda4.png)
 
 
 ## Задание 2
