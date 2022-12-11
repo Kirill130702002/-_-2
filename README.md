@@ -247,8 +247,110 @@ Send(4, a, b, loss)
 
 
 ## Задание 3
+Был переписан скрипт из 1 задания для подгрузки данных об A, B, LOSS из гугл таблицы После чего в зависимости от LOSS проигрывался звук: LOSS > 1500 = Badaudio , LOSS <= 1500 && LOSS > 500 = Noramlaudio , LOSS <= 500 = Goodaudio Результат работы скрипта:
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
+using SimpleJSON;
+using System.Globalization;
+
+public class NewBehaviourScript : MonoBehaviour
+{
+    public AudioClip goodSpeak;
+    public AudioClip normalSpeak;
+
+    public AudioClip badSpeak;
+
+    private AudioSource selectAudio;
+    private Dictionary<string, double> dataSet = new Dictionary<string, double>();
+    private bool statusStart = false;
+    private int i = 0;
 
 
+    // Start is called before the first frame update
+    void Start()
+    {
+        StartCoroutine(GoogleSheets());
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (statusStart == false & i != dataSet.Count && dataSet["Loss_" + i.ToString()] <= 500)
+        {
+            StartCoroutine(PlaySelectedaudioGood());
+            Debug.Log(dataSet["Loss_" + i.ToString()]);
+        }
+
+        if (statusStart == false & i != dataSet.Count && dataSet["Loss_" + i.ToString()] > 500 && dataSet["Loss_" + i.ToString()] < 1500)
+        {
+            StartCoroutine(PlaySelectedaudioNormal());
+            Debug.Log(dataSet["Loss_" + i.ToString()]);
+        }
+
+        if (statusStart == false & i != dataSet.Count && dataSet["Loss_" + i.ToString()] >= 1500)
+        {
+            StartCoroutine(PlaySelectedaudioBad());
+            Debug.Log(dataSet["Loss_" + i.ToString()]);
+        }
+    }
+
+    IEnumerator GoogleSheets()
+    {
+        UnityWebRequest currentResp = UnityWebRequest.Get("https://sheets.googleapis.com/v4/spreadsheets/11OrVsuBftaqx-aVzEqo8SA8FyxlovmJQdGOqDjuu2VE/values/Лист1?key=AIzaSyCkKLOv5Wvmfpkco4Bp-LfoCPYLK3YyldU");
+        yield return currentResp.SendWebRequest();
+        string rawResp = currentResp.downloadHandler.text;
+        var rawJson = JSON.Parse(rawResp);
+        for (var i = 0; i < rawJson["values"].Count; i++)
+        {
+            var item = rawJson["values"][i];
+            var parseJson = JSON.Parse(item.ToString());
+            var selectedRow = parseJson.AsStringList;
+            var value = selectedRow[2];
+            var loss = double.Parse(value, CultureInfo.InvariantCulture);
+            dataSet.Add("Loss_" + i.ToString(), loss);
+        }
+    }
+
+    IEnumerator PlaySelectedaudioGood()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = goodSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(3);
+        statusStart = false;
+        i++;
+    }
+
+    IEnumerator PlaySelectedaudioNormal()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = normalSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(4);
+        statusStart = false;
+        i++;
+    }
+
+    IEnumerator PlaySelectedaudioBad()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = badSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(2);
+        statusStart = false;
+        i++;
+    }
+}
+```
+
+![image](https://user-images.githubusercontent.com/104893843/206925083-805194bb-8c54-4b29-b767-546ad9facc79.png)
 
 ### Выводы
-
+Я научился подгружать и загружать данные из гугл таблиц при помощи связки python , C#
