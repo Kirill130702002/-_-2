@@ -66,6 +66,108 @@ while i <= len(mon):
 ![image](https://user-images.githubusercontent.com/104893843/206854035-720ce92c-ce19-4340-b209-3bd78f08a02b.png)
 ![image](https://user-images.githubusercontent.com/104893843/206920345-150cae1c-ccb8-44c1-a0a8-97ecc985cda4.png)
 
+После этого был написанн C# скрипт для юнити чтобы подгрузить данные из гугл таблиц в юнити и связать это с звуком в зависимости от данных.
+
+Код записанный в скрипте С№:
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
+using SimpleJSON;
+
+public class NewBehaviourScript : MonoBehaviour
+{
+    public AudioClip goodSpeak;
+    public AudioClip normalSpeak;
+    public AudioClip badSpeak;
+    private AudioSource selectAudio;
+    private Dictionary<string, float> dataSet = new Dictionary<string, float>();
+    private bool statusStart = false;
+    private int i = 1;
+
+ 
+    // Start is called before the first frame update
+    void Start()
+    {
+        StartCoroutine(GoogleSheets());
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (dataSet["Mon_" + i.ToString()] <= 10 & statusStart == false & i != dataSet.Count)
+        {
+            StartCoroutine(PlaySelectAudioGood());
+            Debug.Log(dataSet["Mon_" + i.ToString()]);
+        }
+
+        if (dataSet["Mon_" + i.ToString()] > 10 & dataSet["Mon_" + i.ToString()] <= 100 & statusStart == false & i != dataSet.Count)
+        {
+            StartCoroutine(PlaySelectAudioNormal());
+            Debug.Log(dataSet["Mon_" + i.ToString()]);
+        }
+
+        if (dataSet["Mon_" + i.ToString()] >= 100 & statusStart == false & i != dataSet.Count)
+        {
+            StartCoroutine(PlaySelectAudioBad());
+            Debug.Log(dataSet["Mon_" + i.ToString()]);
+        }
+    }
+
+    IEnumerator GoogleSheets()
+    {
+        UnityWebRequest curentResp = UnityWebRequest.Get("https://sheets.googleapis.com/v4/spreadsheets/11OrVsuBftaqx-aVzEqo8SA8FyxlovmJQdGOqDjuu2VE/values/Лист1?key=AIzaSyCkKLOv5Wvmfpkco4Bp-LfoCPYLK3YyldU");
+        yield return curentResp.SendWebRequest();
+        string rowResp = curentResp.downloadHandler.text;
+        var rowJson = JSON.Parse(rowResp); 
+        foreach (var itemRowJson in rowJson["values"]) 
+        {
+            var parseJson = JSON.Parse(itemRowJson.ToString());
+            var selectRow = parseJson[0].AsStringList;
+            dataSet.Add(("Mon_" + selectRow[0]), float.Parse(selectRow[2]));
+        }
+    }
+
+    IEnumerator PlaySelectAudioGood()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = goodSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(3);
+        statusStart = false;
+        i++;
+    }
+
+    IEnumerator PlaySelectAudioNormal()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = normalSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(3);
+        statusStart = false;
+        i++;
+    }
+
+    IEnumerator PlaySelectAudioBad()
+    {
+        statusStart = true;
+        selectAudio = GetComponent<AudioSource>();
+        selectAudio.clip = badSpeak;
+        selectAudio.Play();
+        yield return new WaitForSeconds(4);
+        statusStart = false;
+        i++;
+    }
+}
+```
+Результаты выполнения скрипта:
+![image](https://user-images.githubusercontent.com/104893843/206923040-8adfb059-bbd5-4564-8fc8-212d35e0092e.png)
+
+
 
 ## Задание 2
 
